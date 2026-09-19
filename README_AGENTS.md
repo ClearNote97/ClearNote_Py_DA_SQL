@@ -236,6 +236,8 @@ Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateComm
 
 **Cómo se reconoce:** solo existe `requirements.txt`. No hay `pyproject.toml`, ni `uv.lock`, ni `.venv`. El contenedor nunca se ha construido.
 
+> La plantilla se entrega **a propósito** en Estado 0: `requirements.txt` es la **única** fuente de dependencias. `pyproject.toml` y `uv.lock` **no faltan** — se generan al construir el contenedor (abajo). No hay que crearlos a mano ni "arreglar" su ausencia.
+
 **Qué pasa al hacer Reopen in Container (primera vez):**
 - El `postCreateCommand` detecta que solo hay `requirements.txt` y ejecuta:
   `uv init --no-package --no-workspace .` → elimina el `main.py` por defecto → `uv add -r requirements.txt`.
@@ -243,10 +245,15 @@ Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateComm
 
 **Qué hacemos juntos en esta primera sesión:**
 1. Definir el **objetivo concreto** del proyecto (qué ingiere, qué produce).
-2. Poblar el `.env` con las credenciales reales (nunca se versiona; ya está en `.gitignore`).
-3. Confirmar la convención de carpetas (§6): `sandbox/`, `tests/`, `output/` con su `README.md`, y `sandbox/*` ignorado salvo su README.
-4. (Opcional, según el agente) Sentar la **memoria del proyecto** (contexto persistente entre sesiones) — p. ej. en **[Helix](https://github.com/ftuga/helix_asisten)**, con `/helix-analiza`.
-5. Commitear `pyproject.toml` + `uv.lock` recién generados.
+2. **Conversación seria del stack.** Python-first es el punto de partida, pero **no se asume**: se resuelven las
+   *preguntas de arranque* (tipo de interfaz y framework; ¿solo Python u otros lenguajes en algún borde?; DB/ORM;
+   analítica; API; despliegue). En apps SDD las preguntas viven en `spec/constitution/03_stack.md` y se registran ahí;
+   en plantillas de datos, el eje SQL/no-SQL (§2). *(Opcional: para conducir la interrogación puedes usar una skill
+   de este tipo — p. ej. `grill-me` en Helix.)*
+3. Poblar el `.env` con las credenciales reales (nunca se versiona; ya está en `.gitignore`).
+4. Confirmar la convención de carpetas (§6): `sandbox/`, `tests/`, `output/` con su `README.md`, y `sandbox/*` ignorado salvo su README.
+5. (Opcional, según el agente) Sentar la **memoria del proyecto** (contexto persistente entre sesiones) — p. ej. en **[Helix](https://github.com/ftuga/helix_asisten)**, con `/helix-analiza`.
+6. Commitear `pyproject.toml` + `uv.lock` recién generados.
 
 ### 🔵 Estado N — Sesiones siguientes (ya funcionando)
 
