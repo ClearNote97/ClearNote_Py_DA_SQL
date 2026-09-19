@@ -131,18 +131,30 @@ Me entero de lo que pasa por **dos vías**:
 
 ## 6. Convención de carpetas: proteger el entregable
 
-Para no ensuciar el resultado real con experimentos a medio hacer, separamos **tres capas**:
+La convención **depende del tipo de trabajo** (Eje 1, §2). Dos variantes, un mismo principio: **separar el tanteo de lo verificado y proteger el entregable.**
+
+### Variante A — Trabajo con datos (analítica / DS / investigación)
 
 ```
-sandbox/    → experimentos desechables (probar conexión SQL, inspeccionar un dataframe).
-              Su CONTENIDO no se versiona; aquí rompo cosas sin miedo.
-tests/      → verificación formal (pytest): reproduce bugs, cubre happy path + edge + caso vacío.
-              SÍ se versiona. Es el gate: aquí demuestro que algo funciona ANTES de darlo por bueno.
+sandbox/    → experimentos desechables. Su CONTENIDO no se versiona; aquí se rompe sin miedo.
+tests/      → verificación formal (pytest): happy path + edge + caso vacío. El gate.
 output/     → SOLO resultados finales, ya verificados. El entregable real.
 ```
+**Flujo:** `sandbox/` → `tests/` → `output/`. Nada llega a `output/` sin pasar el gate.
 
-**Flujo:** `sandbox/` (tanteo sucio) → `tests/` (fijo lo que funciona) → `output/` (solo lo comprobado).
-Nada llega a `output/` ni al código real sin pasar el gate.
+### Variante B — Desarrollo de aplicaciones (Spec-Driven Development)
+
+```
+spec/       → lo que DEBE ser verdad (constitución, features, plan, contratos). Prescriptivo.
+src/        → la implementación (arquitectura limpia).
+tests/      → verificación: unit (espejo de src) + acceptance (por feature, contra el spec).
+docs/       → cómo y por qué es así lo construido. Descriptivo.
+sandbox/    → OPCIONAL (experimentos sueltos).
+```
+**Sin `output/`:** el entregable es el código / la app corriendo. Los outputs de analítica van a su casa
+(la DB `gold`, `data/storage/`), **nunca** a una carpeta única ni dentro de `src/`.
+
+**Universal en ambas variantes:** `tests/` siempre, `docs/` siempre, `README.md` por carpeta, y el patrón de placeholders.
 
 ### La estructura viaja; el contenido depende de su sensibilidad
 
@@ -173,6 +185,8 @@ La documentación debe ser **fácil de entender para tus yos futuros y para mí 
 **Reglas del estándar:**
 
 - **`README_AGENTS.md` y `README.md` son documentos separados** (uno es *cómo trabajamos*, el otro *qué es este proyecto*). No se fusionan.
+- **Descubrimiento por el agente:** este contrato es la **fuente de verdad**. Los agentes lo encuentran vía **`AGENTS.md`**
+  (entrada estándar que auto-leen: apunta aquí + lleva lo específico del proyecto) y **`CLAUDE.md`** (puntero fino → `AGENTS.md`, para Claude Code).
 - **El `README.md` de proyecto es un documento VIVO.** En la plantilla trae una **línea base** (instalación + especificaciones técnicas), pensada para quien clona el repo. Cuando el requerimiento del proyecto queda **planificado**, esa línea base **no se amplía: se elimina y el `README.md` se reescribe desde cero** como el README real del proyecto (objetivo, qué ingiere/produce, cómo se corre). A partir de ahí **se actualiza a medida que el trabajo avanza**.
 - **Fuente única de verdad de las decisiones = un archivo humano-legible en `docs/`.** La bitácora de decisiones vive ordenada **ahí**, para que un humano la lea. La memoria del agente (p. ej. `.claude/memory/` en Claude Code) **apunta a ese archivo**, no guarda una copia divergente. Se sincronizan; **`docs/` manda**.
 - **El set completo de documentación va en TODAS las plantillas**, no solo en las más grandes.
