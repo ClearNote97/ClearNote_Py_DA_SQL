@@ -20,7 +20,7 @@ Flujo: **ingesta → limpieza → SQL → stats/ML → visualización → report
 | Agente | Fase / rol | `model_hint` | Herramientas |
 |---|---|---|---|
 | [`data-ingestor`](./data-ingestor.yaml) | Adquiere datos a la capa cruda (inmutable). | `balanced` | read, grep, glob, edit, write, bash, web |
-| [`data-cleaner`](./data-cleaner.yaml) | Limpia/normaliza/valida (Polars; `src/utils`). | `balanced` | read, grep, glob, edit, write, bash |
+| [`data-cleaner`](./data-cleaner.yaml) | Limpia/normaliza/valida (pandas; `src/utils`). | `balanced` | read, grep, glob, edit, write, bash |
 | [`sql-analyst`](./sql-analyst.yaml) | Escribe y optimiza SQL (consultas, datasets, `src/db`/`pipelines`). | `balanced` | read, grep, glob, edit, write, bash |
 | [`stats-analyst`](./stats-analyst.yaml) | EDA, métricas y pruebas estadísticas, con rigor. | `frontier` | read, grep, glob, edit, write, bash |
 | [`ml-engineer`](./ml-engineer.yaml) | Modelado ML reproducible, sin leakage. | `frontier` | read, grep, glob, edit, write, bash |
