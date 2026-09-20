@@ -14,8 +14,20 @@ load_dotenv()
 MSSQL_HOST = os.getenv("MSSQL_HOST")
 MSSQL_USER = os.getenv("MSSQL_USER")
 MSSQL_PASSWORD = os.getenv("MSSQL_PASSWORD")
-MSSQL_DRIVER = "ODBC Driver 17 for SQL Server"
-# Opcionales: None si no se definen -> URL.create() los omite (caso DataWarehouse).
+# Driver ODBC CONFIGURABLE. El DEFAULT debe COINCIDIR con el que instala el contenedor
+# (.devcontainer/Dockerfile → hoy `msodbcsql17`). Si no coinciden, falla con
+# "Data source name not found / driver not found". Para pasar a Driver 18 (más moderno):
+# instala `msodbcsql18` en el Dockerfile y pon MSSQL_DRIVER=ODBC Driver 18 for SQL Server.
+MSSQL_DRIVER = os.getenv("MSSQL_DRIVER", "ODBC Driver 17 for SQL Server")
+# Cifrado: el Driver 17 NO lo fuerza → por defecto se omiten (comportamiento nativo).
+# El Driver 18 SÍ activa Encrypt=yes → contra un cert autofirmado necesitas
+# MSSQL_TRUST_SERVER_CERT=yes, o rompe con error TLS/cert. (Esta es la causa típica de
+# "solo funciona con pyodbc": el string de pyodbc traía TrustServerCertificate=yes.)
+MSSQL_ENCRYPT = os.getenv("MSSQL_ENCRYPT")            # vacío = default del driver
+MSSQL_TRUST_CERT = os.getenv("MSSQL_TRUST_SERVER_CERT")
+# Opcionales: None si no se definen -> URL.create() los omite.
+# OJO: "sin base" NO es "sin contexto": SQL Server usa la base POR DEFECTO del login.
+# Si esa default no es accesible → "Cannot open database". Para explorar el server, usa 'master'.
 MSSQL_NAME = os.getenv("MSSQL_NAME") or None
 _mssql_port = os.getenv("MSSQL_PORT")
 MSSQL_PORT = int(_mssql_port) if _mssql_port else None

@@ -139,8 +139,19 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 | PostgreSQL | `postgresql+psycopg` | `psycopg[binary]` | ninguna (binary) |
 | Oracle | `oracle+oracledb` | `oracledb` | ninguna en modo *thin* |
 
-> **`MSSQL_NAME` y `MSSQL_PORT` son opcionales**: si los dejas vacíos, `URL.create()` los omite (útil con un DataWarehouse sin una única base de datos).
-> La conexión por **túnel SSH** queda comentada (ver `README_AGENTS.md` §11 Caso B); por defecto usamos conexión directa.
+> **`MSSQL_NAME`/`MSSQL_PORT` son opcionales** (vacío → `URL.create()` los omite). Pero **"sin base" ≠ "sin contexto":**
+> SQL Server siempre conecta a *una* base; si omites `MSSQL_NAME`, usa la **base por defecto del login**. Para
+> explorar el servidor sin fijar una, usa `MSSQL_NAME=master`.
+> La conexión por **túnel SSH** queda comentada (ver `README_AGENTS.md` §11 Caso B); por defecto, conexión directa.
+
+### 🔧 Si la conexión falla (y sigues queriendo SQLAlchemy)
+
+| Síntoma | Causa | Solución |
+|---|---|---|
+| *"Cannot open database …"* o login falla al no dar base | La base **por defecto** del login no es accesible | `MSSQL_NAME=master` (o una base a la que sí tengas acceso) |
+| *"Data source name not found / driver not found"* | `MSSQL_DRIVER` ≠ el driver instalado en el contenedor | Ajusta `MSSQL_DRIVER` al real (hoy el Dockerfile trae `msodbcsql17`) |
+| Error **TLS / certificado** (típico con Driver 18) | `Encrypt=yes` contra un cert autofirmado | `MSSQL_ENCRYPT=yes` **+** `MSSQL_TRUST_SERVER_CERT=yes` |
+| *"En pyodbc funciona pero aquí no"* | El string de pyodbc traía algo que la URL no | Usa el **escape hatch** `odbc_connect` (comentado en `src/db/connection.py`): mismo string exacto de pyodbc, pero vía `create_engine` — **no abandonas SQLAlchemy** |
 
 ---
 

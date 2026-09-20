@@ -14,20 +14,50 @@ from src.config import config
 def get_engine_mssql() -> Engine:
     """Crea el engine de SQL Server (pyodbc) usando `URL.create()`.
 
-    `URL.create()` escapa solo usuario/contraseña/parámetros — sin `quote_plus` manual
-    ni `odbc_connect`. `MSSQL_NAME` y `MSSQL_PORT` son **opcionales**: si vienen `None`,
-    se omiten (útil al trabajar contra un DataWarehouse sin una única base de datos).
+    `URL.create()` escapa solo usuario/contraseña/parámetros (sin `quote_plus` manual).
+    `MSSQL_NAME` y `MSSQL_PORT` son **opcionales** (None → se omiten).
+
+    ⚠️ SIN base de datos (`MSSQL_NAME` vacío): SQL Server **no** queda "sin contexto" —
+    conecta a la base **POR DEFECTO** del login. Si esa default no es accesible, verás
+    *"Cannot open database"*. Para explorar el servidor sin fijar una base, apunta a
+    `master` (todo login suele poder abrirla): pon `MSSQL_NAME=master`.
+
+    `Encrypt`/`TrustServerCertificate` salen de config (clave con Driver 18: sin
+    `TrustServerCertificate=yes` contra un cert autofirmado, la conexión rompe con error TLS).
     """
+    query = {"driver": config.MSSQL_DRIVER}
+    if config.MSSQL_ENCRYPT:
+        query["Encrypt"] = config.MSSQL_ENCRYPT
+    if config.MSSQL_TRUST_CERT:
+        query["TrustServerCertificate"] = config.MSSQL_TRUST_CERT
     url = URL.create(
         "mssql+pyodbc",
         username=config.MSSQL_USER,
         password=config.MSSQL_PASSWORD,
         host=config.MSSQL_HOST,
         port=config.MSSQL_PORT,
-        database=config.MSSQL_NAME,
-        query={"driver": config.MSSQL_DRIVER},
+        database=config.MSSQL_NAME,   # None → base por defecto del login
+        query=query,
     )
     return create_engine(url)
+
+
+# --- Escape hatch: "funciona en pyodbc pero no vía URL.create" ----------------
+# Si algún driver/param quisquilloso solo funciona con el string crudo de pyodbc,
+# construye el string ODBC EXACTO y entrégalo por `odbc_connect`: sigues en SQLAlchemy
+# (create_engine, pooling, ORM) — solo controlas el string byte a byte, no abandonas SQLAlchemy.
+# def get_engine_mssql_odbc() -> Engine:
+#     parts = [
+#         f"DRIVER={{{config.MSSQL_DRIVER}}}",
+#         "SERVER=" + config.MSSQL_HOST + (f",{config.MSSQL_PORT}" if config.MSSQL_PORT else ""),
+#         f"UID={config.MSSQL_USER}",
+#         f"PWD={config.MSSQL_PASSWORD}",
+#         "Encrypt=yes",
+#         "TrustServerCertificate=yes",
+#     ]
+#     if config.MSSQL_NAME:                       # omitir DATABASE = base por defecto del login
+#         parts.append(f"DATABASE={config.MSSQL_NAME}")
+#     return create_engine(URL.create("mssql+pyodbc", query={"odbc_connect": ";".join(parts)}))
 
 
 # ---------------------------------------------------------------------------
