@@ -211,3 +211,7 @@ Distribuido bajo licencia [MIT](https://opensource.org/license/MIT). Puedes copi
 ## ✍️ Autor
 
 **MSc. Nicolás Enrique Valencia Santiago**
+
+## 🙏 Agradecimientos
+
+Plantilla enriquecida con la asistencia de [Helix — agente de IA](https://github.com/ftuga/helix_asisten) de [ftuga](https://github.com/ftuga).
