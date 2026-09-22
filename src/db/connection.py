@@ -36,7 +36,16 @@ def get_engine_mssql() -> Engine:
         password=config.MSSQL_PASSWORD,
         host=config.MSSQL_HOST,
         port=config.MSSQL_PORT,
-        database=config.MSSQL_NAME,   # None → base por defecto del login
+        # NO revertir a `config.MSSQL_NAME` a secas (ni a None). Cadena vacía "" a propósito:
+        # el conector mssql+pyodbc decide modo host vs DSN con esta única heurística
+        # (sqlalchemy/connectors/pyodbc.py):
+        #     dsn_connection = "dsn" in keys or ("host" in keys and "database" not in keys)
+        # Con host presente y database=None, SQLAlchemy NO incluye database en `keys`, cae en
+        # modo DSN, renderiza `dsn=<host>;...` y DESCARTA el token DRIVER → pyodbc busca un DSN
+        # llamado <host>, no existe, y sin driver falla con IM002. Con "" (que NO es None),
+        # database SÍ entra en `keys` → modo host (emite DRIVER=/SERVER=) y `Database=` vacío,
+        # que SQL Server interpreta como "base por defecto del login" — justo lo que queremos.
+        database=config.MSSQL_NAME or "",
         query=query,
     )
     return create_engine(url)
