@@ -322,19 +322,22 @@ Y en `src/db/connection.py`, **un engine por motor con nombre propio**: `get_eng
 
 ### Dos casos de conexión
 
-**Caso A — Conexión directa.** El motor es alcanzable directamente (SQL Server en la red, o un Postgres sin túnel). El engine se arma con **`URL.create()`**, que **escapa solo** usuario, contraseña y parámetros — sin `quote_plus` manual ni `odbc_connect`, y omitiendo `NAME`/`PORT` cuando son `None`.
+**Caso A — Conexión directa.** El motor es alcanzable directamente (SQL Server en la red, o un Postgres sin túnel). El engine se arma con **`URL.create()`**, que **escapa solo** usuario, contraseña y parámetros — sin `quote_plus` manual ni `odbc_connect`, y omitiendo `PORT` cuando es `None`.
 ```python
 from sqlalchemy import create_engine
 from sqlalchemy.engine import URL
 
-# SQL Server (pyodbc). NAME y PORT opcionales: si son None, URL.create los omite.
+# SQL Server (pyodbc). PORT opcional: si es None, URL.create lo omite.
 url = URL.create(
     "mssql+pyodbc",
     username=config.MSSQL_USER,
     password=config.MSSQL_PASSWORD,   # el escaping lo hace URL.create
     host=config.MSSQL_HOST,
     port=config.MSSQL_PORT,           # None si no se define
-    database=config.MSSQL_NAME,       # None si no se define
+    # database="" a propósito (NO None): con host + database=None, el conector cae en la
+    # heurística DSN de pyodbc, descarta el DRIVER y falla con IM002. "" fuerza modo host
+    # y `Database=` vacío = base por defecto del login. Ver comentario en src/db/connection.py.
+    database=config.MSSQL_NAME or "",
     query={"driver": config.MSSQL_DRIVER},   # "ODBC Driver 17 for SQL Server"
 )
 engine = create_engine(url)
