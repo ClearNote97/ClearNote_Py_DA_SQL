@@ -1,5 +1,17 @@
 # 🐍 ClearNote Py DA SQL — Plantilla Dev Container para análisis de datos en Python con SQL
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white" alt="Python 3.14">
+  <img src="https://img.shields.io/badge/uv-package%20manager-DE5FE9" alt="uv">
+  <img src="https://img.shields.io/badge/pandas-data-150458?logo=pandas&logoColor=white" alt="pandas">
+  <img src="https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy">
+  <img src="https://img.shields.io/badge/SQL_Server-pyodbc-CC2927?logo=microsoftsqlserver&logoColor=white" alt="SQL Server">
+  <img src="https://img.shields.io/badge/Dev_Container-Docker-2496ED?logo=docker&logoColor=white" alt="Dev Container">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT">
+</p>
+
+<p align="center"><em>Análisis de datos en Python con conexión a SQL — de la consulta al hallazgo.</em></p>
+
 Plantilla **reproducible, ligera y portable** para análisis de datos en Python **con conexión a bases
 de datos SQL**, sobre **VS Code + Dev Containers + Docker + `uv`**. Entorno aislado y consistente, sin
 instalar el toolchain del proyecto en tu máquina anfitriona.
