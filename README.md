@@ -3,7 +3,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white" alt="Python 3.14">
   <img src="https://img.shields.io/badge/uv-package%20manager-DE5FE9" alt="uv">
-  <img src="https://img.shields.io/badge/pandas-data-150458?logo=pandas&logoColor=white" alt="pandas">
   <img src="https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy">
   <img src="https://img.shields.io/badge/SQL-multi--motor-blue" alt="SQL (multi-motor)">
   <!-- Default activo: SQL Server (pyodbc). PostgreSQL y Oracle vienen comentados en src/db/connection.py, .env.example y el Dockerfile — cambiar de motor es descomentar. -->
