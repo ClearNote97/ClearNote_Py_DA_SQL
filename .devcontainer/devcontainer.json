@@ -1,5 +1,6 @@
 {
-  "name": "clearnote-py-da-sql",
+  // Nombre = carpeta del proyecto (en VS Code y en Docker), nunca uno genérico de la plantilla.
+  "name": "${localWorkspaceFolderBasename}",
   // 🐳 Imagen base de Dev Containers (incluye VS Code + Python)
   "build": {
     "dockerfile": "Dockerfile",
@@ -7,6 +8,9 @@
   },
   // 📂 Carpeta de trabajo dentro del contenedor
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  // Contenedor con nombre fijo derivado de la carpeta (por defecto Docker inventa uno al azar).
+  // La carpeta no debe tener espacios: Docker no los admite en nombres de contenedor.
+  "runArgs": ["--name", "${localWorkspaceFolderBasename}_dev"],
   "customizations": {
     // ⚙️ Personalizaciones adicionales para VS Code
     "vscode": {
@@ -43,6 +47,6 @@
   // 👤 Usuario por defecto en el contenedor
   "remoteUser": "root",
 
-  // 🐍 Comando para instalar dependencias usando uv, que es un gestor de paquetes moderno y eficiente. Se verifica si existe pyproject.toml o requirements.txt para decidir cómo instalar las dependencias.
-  "postCreateCommand": "sh -lc 'if [ -f pyproject.toml ]; then if [ -f uv.lock ]; then uv sync --locked; else uv lock && uv sync; fi; elif [ -f requirements.txt ]; then uv init --no-package --no-workspace . && rm -f main.py && uv add -r requirements.txt; else echo \"No se encontró ni pyproject.toml ni requirements.txt\" >&2; exit 1; fi'"
+  // 🐍 Comando para instalar dependencias usando uv, que es un gestor de paquetes moderno y eficiente. Se verifica si existe pyproject.toml o requirements.txt para decidir cómo instalar las dependencias; al final corre scripts/smoke-test.sh (no bloquea).
+  "postCreateCommand": "sh -lc 'if [ -f pyproject.toml ]; then if [ -f uv.lock ]; then uv sync --locked; else uv lock && uv sync; fi; elif [ -f requirements.txt ]; then uv init --no-package --no-workspace . && rm -f main.py && uv add -r requirements.txt; else echo \"No se encontró ni pyproject.toml ni requirements.txt\" >&2; exit 1; fi; bash scripts/smoke-test.sh || echo \"⚠️  smoke-test con hallazgos (no bloquea)\"'"
 }

@@ -90,6 +90,8 @@ git push -u origin main
 
 En VS Code: **Ctrl+Shift+P → Reopen in Container**. Espera a que termine el `postCreateCommand`
 (prepara `.venv` e instala/sincroniza dependencias con `uv`). **No corras `pip install` a mano.**
+Al final corre el **smoke test** (sintaxis + guard de conexión a SQL Server, sin conectarse); puedes
+repetirlo cuando quieras con `bash scripts/smoke-test.sh`.
 
 ---
 
@@ -154,8 +156,8 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 > **`MSSQL_NAME`/`MSSQL_PORT` son opcionales.** `MSSQL_PORT` vacío → `URL.create()` lo omite.
 > **"Sin base" ≠ "sin contexto":** SQL Server siempre conecta a *una* base; si dejas `MSSQL_NAME` vacío, usa la
 > **base por defecto del login**. Para explorar el servidor sin fijar una, usa `MSSQL_NAME=master`.
-> ⚙️ *Nota interna:* `MSSQL_NAME` vacío **no** se omite — `connection.py` pasa `database=""` a propósito para evitar
-> el modo DSN de `pyodbc` (ver la fila **IM002** abajo y el comentario en `src/db/connection.py`).
+> ⚙️ *Nota interna:* SQL Server le entrega a pyodbc el **string ODBC exacto** con `creator=`, no por `URL.create()`: sin
+> `MSSQL_NAME`, `URL.create()` caería en el modo DSN de `pyodbc` (ver la fila **IM002** abajo y `src/db/connection.py`).
 > La conexión por **túnel SSH** queda comentada (ver `README_AGENTS.md` §11 Caso B); por defecto, conexión directa.
 
 ### 🔧 Si la conexión falla (y sigues queriendo SQLAlchemy)
@@ -163,10 +165,10 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 | Síntoma | Causa | Solución |
 |---|---|---|
 | *"Cannot open database …"* o login falla al no dar base | La base **por defecto** del login no es accesible | `MSSQL_NAME=master` (o una base a la que sí tengas acceso) |
-| **`IM002`** *"data source name not found and no default driver"* **sin dar base** | Heurística DSN de `pyodbc`: con `host` y `database=None`, SQLAlchemy renderiza `dsn=<host>` y **descarta el `DRIVER=`** | **Ya resuelto en la plantilla** (`database=""` fuerza modo host). Si lo ves, es que alguien revirtió el `or ""` en `src/db/connection.py` |
+| **`IM002`** *"data source name not found and no default driver"* **sin dar base** | Heurística DSN de `pyodbc`: con `host` y sin `database`, `URL.create()` renderiza `dsn=<host>` y **descarta el `DRIVER=`** (ni `None` ni `""` lo evitan) | **Ya resuelto en la plantilla:** `get_engine_mssql()` arma el string ODBC (`mssql_connection_string()`) y se lo entrega a pyodbc con `creator=`. Si lo ves, alguien volvió a `URL.create()` para SQL Server (el smoke test lo detecta) |
 | *"Data source name not found / driver not found"* | `MSSQL_DRIVER` ≠ el driver instalado en el contenedor | Ajusta `MSSQL_DRIVER` al real (hoy el Dockerfile trae `msodbcsql17`) |
 | Error **TLS / certificado** (típico con Driver 18) | `Encrypt=yes` contra un cert autofirmado | `MSSQL_ENCRYPT=yes` **+** `MSSQL_TRUST_SERVER_CERT=yes` |
-| *"En pyodbc funciona pero aquí no"* | El string de pyodbc traía algo que la URL no | Usa el **escape hatch** `odbc_connect` (comentado en `src/db/connection.py`): mismo string exacto de pyodbc, pero vía `create_engine` — **no abandonas SQLAlchemy** |
+| *"En pyodbc funciona pero aquí no"* | El string de pyodbc traía un parámetro que el nuestro no | Agrégalo a `parts` en `mssql_connection_string()`: es el string exacto que recibe pyodbc — **no abandonas SQLAlchemy** |
 
 ---
 
@@ -180,7 +182,7 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 │   └── other/          # datos en formatos no-SQL (.csv, .parquet, .xlsx, …)
 ├── docs/               # documentación: bitácora de decisiones, diccionario de datos
 ├── notebooks/          # exploración y prototipado (.py / .ipynb)
-├── scripts/            # run_pipeline.py (punto de entrada del pipeline)
+├── scripts/            # run_pipeline.py (entrada del pipeline) · smoke-test.sh (salud del proyecto)
 ├── sandbox/            # experimentos desechables — su contenido NO se versiona
 ├── tests/              # verificación formal (pytest) — el gate
 ├── output/             # entregable final, ya verificado

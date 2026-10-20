@@ -2,71 +2,63 @@
 
 Ejemplo **activo**: SQL Server (pyodbc). PostgreSQL y Oracle quedan como referencia comentada.
 El código de conexión es *código*, por eso vive en `src/`; las consultas `.sql` viven en `data/sql/`.
-Un engine por motor, con nombre propio (nunca un `get_engine()` genérico).
+Un engine por motor, con nombre propio (nunca un `get_engine()` genérico). PostgreSQL y
+Oracle usan `URL.create()`; SQL Server no (ver `get_engine_mssql`).
 """
 
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL, Engine
+from sqlalchemy.engine import URL, Engine  # noqa: F401 — URL lo usan los motores comentados de abajo
 
 from src.config import config
 
 
-def get_engine_mssql() -> Engine:
-    """Crea el engine de SQL Server (pyodbc) usando `URL.create()`.
+def _odbc_value(value: object) -> str:
+    """Cita un valor del string ODBC: `{…}` duplicando `}` (protege `;`, `}` y `=`)."""
+    return "{" + str(value).replace("}", "}}") + "}"
 
-    `URL.create()` escapa solo usuario/contraseña/parámetros (sin `quote_plus` manual).
-    `MSSQL_NAME` y `MSSQL_PORT` son **opcionales** (None → se omiten).
 
-    ⚠️ SIN base de datos (`MSSQL_NAME` vacío): SQL Server **no** queda "sin contexto" —
-    conecta a la base **POR DEFECTO** del login. Si esa default no es accesible, verás
-    *"Cannot open database"*. Para explorar el servidor sin fijar una base, apunta a
-    `master` (todo login suele poder abrirla): pon `MSSQL_NAME=master`.
+def mssql_connection_string() -> str:
+    """String ODBC exacto para SQL Server (función pura: testeable sin driver ni servidor).
 
-    `Encrypt`/`TrustServerCertificate` salen de config (clave con Driver 18: sin
-    `TrustServerCertificate=yes` contra un cert autofirmado, la conexión rompe con error TLS).
+    - Cada valor va citado `{…}` → una contraseña con `;`, `}`, `=` o `+` no rompe el string.
+    - Sin `MSSQL_NAME` no se emite `DATABASE` → SQL Server usa la base **por defecto del login**
+      (no "sin contexto"). Si esa base no es accesible verás *"Cannot open database"*: usa
+      `MSSQL_NAME=master` para explorar el servidor.
+    - `Encrypt`/`TrustServerCertificate` salen de config (con Driver 18, sin
+      `TrustServerCertificate=yes` contra un cert autofirmado la conexión rompe por TLS).
     """
-    query = {"driver": config.MSSQL_DRIVER}
+    server = config.MSSQL_HOST + (f",{config.MSSQL_PORT}" if config.MSSQL_PORT else "")
+    parts = [
+        f"DRIVER={_odbc_value(config.MSSQL_DRIVER)}",
+        f"SERVER={server}",
+        f"UID={_odbc_value(config.MSSQL_USER)}",
+        f"PWD={_odbc_value(config.MSSQL_PASSWORD)}",
+    ]
+    if config.MSSQL_NAME:
+        parts.append(f"DATABASE={_odbc_value(config.MSSQL_NAME)}")
     if config.MSSQL_ENCRYPT:
-        query["Encrypt"] = config.MSSQL_ENCRYPT
+        parts.append(f"Encrypt={config.MSSQL_ENCRYPT}")
     if config.MSSQL_TRUST_CERT:
-        query["TrustServerCertificate"] = config.MSSQL_TRUST_CERT
-    url = URL.create(
-        "mssql+pyodbc",
-        username=config.MSSQL_USER,
-        password=config.MSSQL_PASSWORD,
-        host=config.MSSQL_HOST,
-        port=config.MSSQL_PORT,
-        # NO revertir a `config.MSSQL_NAME` a secas (ni a None). Cadena vacía "" a propósito:
-        # el conector mssql+pyodbc decide modo host vs DSN con esta única heurística
-        # (sqlalchemy/connectors/pyodbc.py):
-        #     dsn_connection = "dsn" in keys or ("host" in keys and "database" not in keys)
-        # Con host presente y database=None, SQLAlchemy NO incluye database en `keys`, cae en
-        # modo DSN, renderiza `dsn=<host>;...` y DESCARTA el token DRIVER → pyodbc busca un DSN
-        # llamado <host>, no existe, y sin driver falla con IM002. Con "" (que NO es None),
-        # database SÍ entra en `keys` → modo host (emite DRIVER=/SERVER=) y `Database=` vacío,
-        # que SQL Server interpreta como "base por defecto del login" — justo lo que queremos.
-        database=config.MSSQL_NAME or "",
-        query=query,
-    )
-    return create_engine(url)
+        parts.append(f"TrustServerCertificate={config.MSSQL_TRUST_CERT}")
+    return ";".join(parts)
 
 
-# --- Escape hatch: "funciona en pyodbc pero no vía URL.create" ----------------
-# Si algún driver/param quisquilloso solo funciona con el string crudo de pyodbc,
-# construye el string ODBC EXACTO y entrégalo por `odbc_connect`: sigues en SQLAlchemy
-# (create_engine, pooling, ORM) — solo controlas el string byte a byte, no abandonas SQLAlchemy.
-# def get_engine_mssql_odbc() -> Engine:
-#     parts = [
-#         f"DRIVER={{{config.MSSQL_DRIVER}}}",
-#         "SERVER=" + config.MSSQL_HOST + (f",{config.MSSQL_PORT}" if config.MSSQL_PORT else ""),
-#         f"UID={config.MSSQL_USER}",
-#         f"PWD={config.MSSQL_PASSWORD}",
-#         "Encrypt=yes",
-#         "TrustServerCertificate=yes",
-#     ]
-#     if config.MSSQL_NAME:                       # omitir DATABASE = base por defecto del login
-#         parts.append(f"DATABASE={config.MSSQL_NAME}")
-#     return create_engine(URL.create("mssql+pyodbc", query={"odbc_connect": ";".join(parts)}))
+def get_engine_mssql() -> Engine:
+    """Crea el engine de SQL Server entregándole a pyodbc el string ODBC EXACTO.
+
+    Por qué `creator=` y no `URL.create(...)` ni `odbc_connect`:
+    - `URL.create(host=..., database=None|"")` cae en la heurística DSN de `mssql+pyodbc`
+      (`"host" in keys and "database" not in keys`): renderiza `dsn=<host>`, descarta el
+      `DRIVER=` y falla con **IM002** cuando no hay base.
+    - `odbc_connect` depende de cómo cada versión de SQLAlchemy procesa el valor (2.0 le
+      aplica `unquote_plus` y un `+` de la contraseña se vuelve espacio; 2.1 ya no).
+    Con `creator`, SQLAlchemy nunca toca el string: sigue manejando el pool y `pd.read_sql`,
+    pero pyodbc recibe exactamente lo que arma `mssql_connection_string()`, en cualquier versión.
+    """
+    import pyodbc  # aquí y no arriba: el string se puede testear sin el driver instalado
+
+    conn_str = mssql_connection_string()
+    return create_engine("mssql+pyodbc://", creator=lambda: pyodbc.connect(conn_str))
 
 
 # ---------------------------------------------------------------------------

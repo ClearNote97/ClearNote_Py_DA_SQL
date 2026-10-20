@@ -79,7 +79,10 @@ El arranque tiene **dos manos**: lo que haces **tú** (setup físico) y lo que h
 5. PUENTE de ejecución — docker ps. Si el contenedor no está arriba, te lo pido
    (no corro en el host). Distingo Estado 0 vs Estado N (§9).
 
-6. OBJETIVO concreto de la sesión — lo confirmamos y arrancamos.
+6. SALUD — corro `bash scripts/smoke-test.sh` (si el proyecto lo trae). Si hay ⚠️ o ❌
+   (p. ej. la carpeta se renombró, falta configuración o un guard se rompió), te lo reporto ANTES de operar.
+
+7. OBJETIVO concreto de la sesión — lo confirmamos y arrancamos.
 ```
 
 ### Lo que haces tú (setup físico)
@@ -250,7 +253,7 @@ Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateComm
    *preguntas de arranque* (tipo de interfaz y framework; ¿solo Python u otros lenguajes en algún borde?; DB/ORM;
    analítica; API; despliegue). En apps SDD las preguntas viven en `spec/constitution/03_stack.md` y se registran ahí;
    en plantillas de datos, el eje SQL/no-SQL (§2). *(Opcional: para conducir la interrogación puedes usar una skill
-   de este tipo — p. ej. `grill-me` en Helix.)*
+   de interrogatorio de requisitos de tu herramienta.)*
 3. Poblar el `.env` con las credenciales reales (nunca se versiona; ya está en `.gitignore`).
 4. Confirmar la convención de carpetas (§6): `sandbox/`, `tests/`, `output/` con su `README.md`, y `sandbox/*` ignorado salvo su README.
 5. (Opcional, según el agente) Sentar la **memoria del proyecto** (contexto persistente entre sesiones) — p. ej. en **[Helix](https://github.com/ftuga/helix_asisten)**, con `/helix-analiza`.
@@ -309,7 +312,13 @@ Mi forma de trabajar SQL desde Python es siempre la misma, **solo con SQLAlchemy
 
 Y en `src/db/connection.py`, **un engine por motor con nombre propio**: `get_engine_postgres()`, `get_engine_mssql()`, etc. Nunca un `get_engine()` genérico que mezcle orígenes.
 
-> **`NAME` y `PORT` son opcionales.** Si no se definen (vienen vacíos/None), `URL.create()` los omite — útil cuando se trabaja contra un **DataWarehouse** sin seleccionar una única base de datos. No estorban si no están.
+> **`NAME` y `PORT` son opcionales.** En PostgreSQL y Oracle, `URL.create()` omite los `None` sin problema. **SQL Server
+> es la excepción:** sin `NAME` (típico contra un **DataWarehouse** sin fijar base), `URL.create()` con `mssql+pyodbc` cae en
+> la heurística DSN del conector (`"host" in keys and "database" not in keys`), descarta el `DRIVER=` y falla con **`IM002`**.
+> Ni `database=None` ni `database=""` lo evitan. Y `odbc_connect` tampoco es fiable: SQLAlchemy 2.0 le aplica `unquote_plus`
+> (un `+` en la contraseña se vuelve espacio) y 2.1 ya no, así que el truco que sirve en una versión rompe la otra. Por eso
+> SQL Server le entrega el string ODBC **directo a pyodbc** con `creator=` (ver Caso A). Sin `DATABASE`, SQL Server usa la
+> base **por defecto del login**. *(Verificado contra SQL Server 2022 real, Driver 17, SQLAlchemy 2.0 y 2.1.)*
 
 ### Dialecto y driver por motor
 
@@ -323,27 +332,26 @@ Y en `src/db/connection.py`, **un engine por motor con nombre propio**: `get_eng
 
 ### Dos casos de conexión
 
-**Caso A — Conexión directa.** El motor es alcanzable directamente (SQL Server en la red, o un Postgres sin túnel). El engine se arma con **`URL.create()`**, que **escapa solo** usuario, contraseña y parámetros — sin `quote_plus` manual ni `odbc_connect`, y omitiendo `PORT` cuando es `None`.
+**Caso A — Conexión directa.** El motor es alcanzable directamente (SQL Server en la red, o un Postgres sin túnel).
+- **PostgreSQL / Oracle:** `URL.create()`, que escapa solo usuario, contraseña y parámetros, y omite `NAME`/`PORT` cuando son `None`.
+- **SQL Server:** el string ODBC exacto, entregado a pyodbc con `creator=` (por la heurística DSN de arriba). SQLAlchemy sigue manejando el pool y `pd.read_sql`, pero **nunca toca el string**, así que no depende de la versión. Cada valor va citado `{…}` duplicando `}`.
 ```python
+import pyodbc
 from sqlalchemy import create_engine
-from sqlalchemy.engine import URL
 
-# SQL Server (pyodbc). PORT opcional: si es None, URL.create lo omite.
-url = URL.create(
-    "mssql+pyodbc",
-    username=config.MSSQL_USER,
-    password=config.MSSQL_PASSWORD,   # el escaping lo hace URL.create
-    host=config.MSSQL_HOST,
-    port=config.MSSQL_PORT,           # None si no se define
-    # database="" a propósito (NO None): con host + database=None, el conector cae en la
-    # heurística DSN de pyodbc, descarta el DRIVER y falla con IM002. "" fuerza modo host
-    # y `Database=` vacío = base por defecto del login. Ver comentario en src/db/connection.py.
-    database=config.MSSQL_NAME or "",
-    query={"driver": config.MSSQL_DRIVER},   # "ODBC Driver 17 for SQL Server"
-)
-engine = create_engine(url)
+def _odbc_value(v):                      # {…} duplicando "}" → ";", "}", "=" y "+" no rompen el string
+    return "{" + str(v).replace("}", "}}") + "}"
 
-# Postgres directo: mismo patrón con "postgresql+psycopg" y sin el query del driver.
+# SQL Server (pyodbc): sin DATABASE = base por defecto del login.
+server = config.MSSQL_HOST + (f",{config.MSSQL_PORT}" if config.MSSQL_PORT else "")
+parts = [f"DRIVER={_odbc_value(config.MSSQL_DRIVER)}", f"SERVER={server}",
+         f"UID={_odbc_value(config.MSSQL_USER)}", f"PWD={_odbc_value(config.MSSQL_PASSWORD)}"]
+if config.MSSQL_NAME:
+    parts.append(f"DATABASE={_odbc_value(config.MSSQL_NAME)}")
+conn_str = ";".join(parts)
+engine = create_engine("mssql+pyodbc://", creator=lambda: pyodbc.connect(conn_str))
+
+# Postgres directo: URL.create("postgresql+psycopg", username=..., password=..., host=..., port=..., database=...)
 ```
 
 **Caso B — Conexión vía túnel SSH.** El motor solo es alcanzable a través de un servidor puente. Se agrega el grupo `SSH_*` y la fábrica **abre el túnel** antes de crear el engine, que apunta a `127.0.0.1:<puerto_local>`. Devuelve **`(engine, tunnel)`**: el túnel debe seguir abierto mientras uses el engine y se cierra con `tunnel.stop()` al final.
