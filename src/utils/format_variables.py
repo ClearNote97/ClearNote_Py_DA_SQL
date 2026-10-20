@@ -1,7 +1,8 @@
 """Conversión de formatos de variables (fechas, enteros, decimales).
 
 Cada función recorre las columnas indicadas, convierte las que existen y reporta por
-consola las que fallan, sin interrumpir el resto del DataFrame.
+consola las que fallan, sin interrumpir el resto del DataFrame. Ninguna modifica el
+DataFrame original: devuelven una copia.
 """
 
 from typing import Literal
@@ -38,6 +39,7 @@ def _formatear_temporal(
     conservar_hora: bool,
 ) -> pd.DataFrame:
     """Núcleo compartido por `format_dates` y `format_datetime`."""
+    df = df.copy()
     for col in columns:
         if col not in df.columns:
             continue
@@ -83,6 +85,7 @@ def format_datetime(
 
 def format_int(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Convierte columnas a entero **nullable** (`Int64`), tolerando NaN."""
+    df = df.copy()
     for col in columns:
         if col in df.columns:
             try:
@@ -94,6 +97,7 @@ def format_int(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
 
 def format_flt(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Convierte columnas a decimal (`float64`)."""
+    df = df.copy()
     for col in columns:
         if col in df.columns:
             try:

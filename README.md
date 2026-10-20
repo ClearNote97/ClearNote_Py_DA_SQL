@@ -71,6 +71,9 @@ mv ClearNote_Py_DA_SQL nuevo_nombre
 cd nuevo_nombre
 ```
 
+> El nombre de la carpeta es también el del devcontainer y el del contenedor (`<carpeta>_dev`):
+> **sin espacios** (usa `_` o `-`), porque Docker no los admite en nombres de contenedor.
+
 ### 4. Inicializa tu propio repositorio *(opcional)*
 
 ```bash
@@ -127,7 +130,7 @@ detecta el estado del proyecto y actúa solo:
 
 - **Formateo y linting con Ruff** (al guardar: `fixAll` + `organizeImports`).
 - **Type checking**: Pylance en modo `basic`, con *inlay hints*.
-- **Extensiones**: Python, Pylance, Ruff, Jupyter, Even Better TOML, GitHub Copilot, Path Intellisense, Material Icon Theme.
+- **Extensiones**: Python, Pylance, Ruff, Jupyter, Even Better TOML, Path Intellisense, Material Icon Theme.
 
 ---
 

@@ -38,7 +38,6 @@
         "charliermarsh.ruff",
         "ms-toolsai.jupyter",
         "tamasfe.even-better-toml",
-        "github.copilot",
         "christian-kohler.path-intellisense",
         "pkief.material-icon-theme"
       ]
