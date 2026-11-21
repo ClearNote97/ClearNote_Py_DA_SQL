@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-label="Flujo de trabajo: Arranca → Conecta → Consulta → Procesa → Verifica → Entrega">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-label="Flujo de trabajo: Arranca → Conecta → Consulta → Procesa → Verifica → Entrega">
 <g font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
-<rect x="1" y="1" width="1198" height="398" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
+<rect x="1" y="1" width="1198" height="558" rx="16" fill="#FFFFFF" stroke="#E2E8F0"/>
 <rect x="40" y="40" width="5" height="40" rx="2.5" fill="#B45309"/>
 <text x="60" y="58" font-size="24" font-weight="700" fill="#0F172A">Flujo de trabajo</text>
 <text x="60" y="80" font-size="15" fill="#475569">De la consulta al entregable verificado</text>
@@ -53,5 +53,18 @@
 <text x="1013.0" y="246" font-size="14" fill="#475569">listo para usar</text>
 <rect x="1013.0" y="262" width="63.8" height="28" rx="7" fill="#EEF2F7"/><text x="1044.9" y="281" text-anchor="middle" font-size="12.5" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" fill="#0F172A">output/</text>
 <path d="M886.5 312 C886.5 358 695.5 358 695.5 318" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="6 6" stroke-linecap="round"/><path d="M690.5 324 L695.5 317 L700.5 324" fill="none" stroke="#B45309" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="791.0" y="372" text-anchor="middle" font-size="13.5" font-style="italic" fill="#475569">no cuadra: se revisa la consulta o la limpieza</text>
+<text x="791.0" y="372" text-anchor="middle" font-size="13.5" font-style="italic" fill="#475569">no cuadra: se revisa la consulta o la limpieza y se anota en la bitácora</text>
+<text x="40" y="412" font-size="12.5" font-weight="700" letter-spacing="1.6" fill="#B45309">QUÉ QUEDA DOCUMENTADO</text><line x1="236" y1="408" x2="1160" y2="408" stroke="#CBD5E1" stroke-dasharray="2 5" stroke-linecap="round"/>
+<rect x="422.0" y="428" width="165.0" height="86" rx="12" fill="#F8EEE6" stroke="#B45309" stroke-opacity="0.55" stroke-dasharray="5 4"/>
+<text x="436.0" y="453" font-size="12.0" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#0F172A">docs/</text>
+<text x="436.0" y="470" font-size="10.0" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#0F172A">diccionario-de-datos.md</text>
+<text x="436.0" y="501" font-size="12.5" fill="#475569">origen de cada columna</text>
+<rect x="613.0" y="428" width="165.0" height="86" rx="12" fill="#F8EEE6" stroke="#B45309" stroke-opacity="0.55" stroke-dasharray="5 4"/>
+<text x="627.0" y="453" font-size="12.0" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#0F172A">docs/</text>
+<text x="627.0" y="470" font-size="10.4" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#0F172A">bitacora-decisiones.md</text>
+<text x="627.0" y="501" font-size="12.5" fill="#475569">qué se decidió y por qué</text>
+<rect x="995.0" y="428" width="165.0" height="86" rx="12" fill="#F8EEE6" stroke="#B45309" stroke-opacity="0.55" stroke-dasharray="5 4"/>
+<text x="1009.0" y="453" font-size="12.0" font-family="'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', monospace" font-weight="600" fill="#0F172A">README.md</text>
+<text x="1009.0" y="501" font-size="12.5" fill="#475569">reescrito y al día</text>
+<text x="40" y="544" font-size="13" font-style="italic" fill="#475569">Si el proyecto es investigación, el manuscrito y la bibliografía también viven en docs/; el PDF final va a output/.</text>
 </g></svg>

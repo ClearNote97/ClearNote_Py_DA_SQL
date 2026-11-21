@@ -35,7 +35,7 @@ instalar el toolchain del proyecto en tu máquina anfitriona.
 
 ## 🔄 Flujo de trabajo
 
-Igual que en el análisis sin SQL, con dos piezas propias: la conexión (`src/db/`) y el catálogo de consultas (`data/sql/`).
+Igual que en el análisis sin SQL, con dos piezas propias: la conexión (`src/db/`) y el catálogo de consultas (`data/sql/`). El carril de abajo muestra **qué queda documentado** en cada paso, según el estándar de documentación (§7 de [`README_AGENTS.md`](./README_AGENTS.md)).
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/diagramas/flujo-trabajo-oscuro.svg">
