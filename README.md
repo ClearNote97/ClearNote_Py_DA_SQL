@@ -1,6 +1,8 @@
-# 🐍 ClearNote Py DA SQL — Plantilla Dev Container para análisis de datos en Python con SQL
+<div align="center">
 
-<p align="center">
+<img src="./assets/diagramas/banner.svg" alt="ClearNote Py DA SQL — Plantilla Dev Container para análisis de datos en Python con SQL" width="100%">
+
+<p>
   <img src="https://img.shields.io/badge/Python-3.14-3776AB?logo=python&logoColor=white" alt="Python 3.14">
   <img src="https://img.shields.io/badge/uv-package%20manager-DE5FE9" alt="uv">
   <img src="https://img.shields.io/badge/SQLAlchemy-ORM-D71F00?logo=sqlalchemy&logoColor=white" alt="SQLAlchemy">
@@ -10,7 +12,13 @@
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="MIT">
 </p>
 
-<p align="center"><em>Análisis de datos en Python con conexión a SQL — de la consulta al hallazgo.</em></p>
+<p><em>Análisis de datos en Python con conexión a SQL — de la consulta al hallazgo.</em></p>
+
+<a href="#-instalación-y-uso"><b>Instalación</b></a> &nbsp;·&nbsp; <a href="#-conexión-a-sql"><b>Conexión a SQL</b></a> &nbsp;·&nbsp; <a href="#-estructura-del-proyecto"><b>Estructura</b></a> &nbsp;·&nbsp; <a href="./README_AGENTS.md"><b>Contrato de trabajo</b></a>
+
+</div>
+
+<br>
 
 Plantilla **reproducible, ligera y portable** para análisis de datos en Python **con conexión a bases
 de datos SQL**, sobre **VS Code + Dev Containers + Docker + `uv`**. Entorno aislado y consistente, sin
@@ -22,6 +30,17 @@ instalar el toolchain del proyecto en tu máquina anfitriona.
 
 > **¿Buscas cómo trabajamos día a día (la dinámica agente ⇄ tú)?** Eso vive en **[`README_AGENTS.md`](./README_AGENTS.md)**.
 > Este archivo es el *qué es y cómo se instala*.
+
+---
+
+## 🔄 Flujo de trabajo
+
+Igual que en el análisis sin SQL, con dos piezas propias: la conexión (`src/db/`) y el catálogo de consultas (`data/sql/`).
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/diagramas/flujo-trabajo-oscuro.svg">
+  <img alt="Diagrama del flujo de trabajo de la plantilla" src="./assets/diagramas/flujo-trabajo-claro.svg" width="100%">
+</picture>
 
 ---
 
@@ -183,6 +202,7 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 ├── data/
 │   ├── sql/            # catálogo de consultas .sql (solo .sql, sin código)
 │   └── other/          # datos en formatos no-SQL (.csv, .parquet, .xlsx, …)
+├── assets/             # lo visual del proyecto: marca · imagenes · iconos · fuentes · diagramas
 ├── docs/               # documentación: bitácora de decisiones, diccionario de datos
 ├── notebooks/          # exploración y prototipado (.py / .ipynb)
 ├── scripts/            # run_pipeline.py (entrada del pipeline) · smoke-test.sh (salud del proyecto)
@@ -235,14 +255,9 @@ sandbox/*
 
 ---
 
-## ⚖️ Licencia
+<div align="center">
 
-Distribuido bajo licencia [MIT](https://opensource.org/license/MIT). Puedes copiar, modificar y reutilizar libremente esta plantilla.
+<sub>Distribuido bajo licencia <a href="https://opensource.org/license/MIT">MIT</a> · Puedes copiar, modificar y reutilizar libremente esta plantilla.</sub><br>
+<sub>Hecho por <b>MSc. Nicolás Enrique Valencia Santiago</b> · Enriquecido con <a href="https://github.com/ftuga/helix_asisten">Helix</a>, el agente de IA de <a href="https://github.com/ftuga">ftuga</a>.</sub>
 
-## ✍️ Autor
-
-**MSc. Nicolás Enrique Valencia Santiago**
-
-## 🙏 Agradecimientos
-
-Plantilla enriquecida con la asistencia de [Helix — agente de IA](https://github.com/ftuga/helix_asisten) de [ftuga](https://github.com/ftuga).
+</div>

@@ -154,11 +154,15 @@ src/        → la implementación (arquitectura limpia).
 tests/      → verificación: unit (espejo de src) + acceptance (por feature, contra el spec).
 docs/       → cómo y por qué es así lo construido. Descriptivo.
 sandbox/    → OPCIONAL (experimentos sueltos).
+packaging/  → distribuir el producto (paquete, ejecutable, instalador). Se borra si no aplica.
+infra/deploy/ → desplegar a un servidor (compose de producción, proxy). Se borra si no aplica.
 ```
 **Sin `output/`:** el entregable es el código / la app corriendo. Los outputs de analítica van a su casa
 (la DB `gold`, `data/storage/`), **nunca** a una carpeta única ni dentro de `src/`.
 
-**Universal en ambas variantes:** `tests/` siempre, `docs/` siempre, `README.md` por carpeta, y el patrón de placeholders.
+**Universal en ambas variantes:** `tests/` siempre, `docs/` siempre, `assets/` para todo lo visual del proyecto
+(marca, imágenes, íconos, fuentes, diagramas), `README.md` por carpeta, y el patrón de placeholders. Las salidas de
+empaquetado (`build/`, `dist/`) nunca se versionan.
 
 ### La estructura viaja; el contenido depende de su sensibilidad
 
@@ -219,6 +223,18 @@ Con el flag de investigación encendido (§2), en `docs/` vive **todo lo que se 
 
 - **Reproducibilidad** — estándar universal, no exclusivo de datos: `uv.lock` versionado, semillas fijas, entorno determinista. Si `uv.lock` cambia, se commitea.
 - **Tests** — SIEMPRE fundamentales para la rigurosidad, en las tres ramas. Todo bug corregido lleva un **test que lo reproduce antes del fix**; cubrir happy path + edge case + caso vacío.
+- **Corridas deterministas.** La **fecha de corte entra por parámetro**, nunca `now()`/`today()`, y queda sellada
+  en el entregable y en el reporte de la corrida: correr dos veces el mismo corte da el mismo resultado. Ojo: el
+  contenedor vive en **UTC**; una fecha de negocio se calcula en la zona horaria del negocio.
+- **Los identificadores son texto.** Se leen con `dtype=str` y nunca pasan por `astype(int)` (se pierden los ceros a
+  la izquierda y aparece `.0` cuando hay vacíos). Una llave compuesta se arma en **un solo lugar**, de forma
+  idempotente (armarla dos veces no le vuelve a poner el prefijo).
+- **Los insumos cambian sin avisar.** Al leer se valida el esquema y se reporta la **lista exacta** de columnas
+  faltantes; la hoja se reconoce por sus columnas, no solo por su nombre; el encoding es explícito (`utf-8` →
+  `utf-8-sig` → `cp1252`). Antes de dar por lista una fuente, un **piloto con un archivo real**: «cargó sin error»
+  con 0 filas o 0 columnas mapeadas es una bandera roja.
+- **Medir antes de construir.** Una hipótesis (un número de un PDF, una cola «que hará falta») se verifica con datos
+  reales antes de convertirla en código.
 
 ### Énfasis por tipo de trabajo (solo contexto: *dónde pongo el peso*)
 
@@ -259,6 +275,14 @@ Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateComm
 5. (Opcional, según el agente) Sentar la **memoria del proyecto** (contexto persistente entre sesiones) — p. ej. en **[Helix](https://github.com/ftuga/helix_asisten)**, con `/helix-analiza`.
 6. Commitear `pyproject.toml` + `uv.lock` recién generados.
 
+### 🟠 Adoptar la plantilla sobre un proyecto que ya existe
+
+No se adapta en sitio. El proyecto original se conserva **intacto** en `docs/legacy/` (o se deja en su repo y se
+referencia): es la **línea base** contra la que se mide cada mejora. Se recupera por etapas a la estructura de la
+plantilla, y cada etapa se compara contra lo que producía el original (mismas cifras, mismas salidas) antes de
+darla por buena. Si el proyecto ya tiene git, **no se borra `.git`**: la historia se conserva. Y antes de fijar la
+versión de Python, se verifica que las dependencias del proyecto tengan *wheels* para ella.
+
 ### 🔵 Estado N — Sesiones siguientes (ya funcionando)
 
 **Cómo se reconoce:** ya existen `pyproject.toml` **y** `uv.lock`. El `.env`, `tests/`, `sandbox/` y la memoria del agente ya están.
@@ -286,6 +310,22 @@ Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateComm
 - **Una sola fuente de verdad para las decisiones** (`docs/`); mi memoria apunta a ella.
 - **Al terminar, botas contenedor + imagen.** El host (WSL + tu agente) queda intacto y limpio para la próxima.
 - Siempre trabajamos desde **WSL**.
+
+**Higiene (cada regla nació de un incidente real):**
+
+- **Un gate no esconde su código de salida.** Con tubería (`pytest | tail`) se usa `set -o pipefail`, o el gate va
+  sin tubería: `prueba | tail && git commit` llegó a commitear una prueba roja.
+- **Se agrega al commit por ruta** (`git add <ruta>`), no `git add -A` a ciegas. Con más de un agente en el mismo
+  árbol, nada de `git stash` (se pisan): cada uno en su `git worktree`.
+- **Nada se borra en el origen sin copia verificada.** Nube, correo, una fuente: primero la copia en otro lugar,
+  verificada por hash; después el borrado. También en los pasos manuales que yo te pida hacer.
+- **Escritura atómica.** Lo nuevo se escribe aparte y reemplaza a lo anterior al final; nunca se destruye el
+  resultado anterior antes de tener el nuevo completo.
+- **Los contratos copiados se excluyen del formateador.** `ruff format` también reformatea los bloques de código de
+  los `.md`: `README_AGENTS.md` va en `extend-exclude` para que siga idéntico en todos los proyectos.
+- **Binarios fijados con la versión de seguridad vigente** (no la que se recuerda de memoria) y verificados con su
+  checksum oficial. El `ARG` se llama `PIN_<HERRAMIENTA>_VERSION`: varias herramientas leen las variables con su
+  propio prefijo (`RCLONE_*`, `AWS_*`) como opciones y el build se rompe.
 
 ---
 

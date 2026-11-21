@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-label="ClearNote Py DA SQL: Análisis de datos en Python con SQL Server, PostgreSQL y Oracle">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0F172A"/><stop offset="1" stop-color="#281202"/>
+    </linearGradient>
+    <radialGradient id="m1" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#B45309" stop-opacity="0.55"/><stop offset="1" stop-color="#B45309" stop-opacity="0"/></radialGradient>
+    <radialGradient id="m2" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#CE8F5F" stop-opacity="0.35"/><stop offset="1" stop-color="#B45309" stop-opacity="0"/></radialGradient>
+    <clipPath id="c"><rect width="1200" height="260" rx="18"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif">
+    <rect width="1200" height="260" fill="url(#g)"/>
+    <circle cx="1030" cy="40" r="260" fill="url(#m1)"/>
+    <circle cx="760" cy="300" r="220" fill="url(#m2)"/>
+    <path d="M840 260 C900 170 1000 150 1080 100 C1140 62 1170 20 1200 0" fill="none" stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="2"/>
+    <path d="M900 260 C960 190 1050 170 1120 130 C1160 108 1185 80 1200 60" fill="none" stroke="#FFFFFF" stroke-opacity="0.07" stroke-width="2"/>
+    <rect x="64" y="52" width="44" height="6" rx="3" fill="#B45309"/>
+    <text x="64" y="112" font-size="46" font-weight="700" fill="#FFFFFF" letter-spacing="-0.5">ClearNote Py DA SQL</text>
+    <text x="64" y="152" font-size="20" fill="#FFFFFF" fill-opacity="0.78">Análisis de datos en Python con SQL Server, PostgreSQL y Oracle</text>
+    <rect x="64" y="180" width="117" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.22"/><text x="122" y="202" text-anchor="middle" font-size="15" fill="#FFFFFF" fill-opacity="0.92">Python 3.14</text><rect x="190.6" y="180" width="108" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.22"/><text x="245" y="202" text-anchor="middle" font-size="15" fill="#FFFFFF" fill-opacity="0.92">SQLAlchemy</text><rect x="308.6" y="180" width="74" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.22"/><text x="345" y="202" text-anchor="middle" font-size="15" fill="#FFFFFF" fill-opacity="0.92">pyodbc</text><rect x="392.20000000000005" y="180" width="39" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.22"/><text x="412" y="202" text-anchor="middle" font-size="15" fill="#FFFFFF" fill-opacity="0.92">uv</text><rect x="441.40000000000003" y="180" width="134" height="34" rx="17" fill="#FFFFFF" fill-opacity="0.10" stroke="#FFFFFF" stroke-opacity="0.22"/><text x="508" y="202" text-anchor="middle" font-size="15" fill="#FFFFFF" fill-opacity="0.92">Dev Container</text>
+  </g>
+</svg>
