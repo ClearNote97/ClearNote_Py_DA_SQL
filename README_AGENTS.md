@@ -250,7 +250,7 @@ Con el flag de investigación encendido (§2), en `docs/` vive **todo lo que se 
 
 ## 9. Los dos estados del proyecto
 
-Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateCommand` cambia según en qué estado estés.**
+Esta es la diferencia clave al arrancar. **El comportamiento del `postCreateCommand` (que llama a `init.sh`) cambia según en qué estado estés.**
 
 ### 🟢 Estado 0 — Proyecto recién nacido (antes del primer `uv`)
 

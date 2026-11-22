@@ -110,7 +110,7 @@ git push -u origin main
 
 ### 5. Abre en el contenedor
 
-En VS Code: **Ctrl+Shift+P → Reopen in Container**. Espera a que termine el `postCreateCommand`
+En VS Code: **Ctrl+Shift+P → Reopen in Container**. Espera a que termine el `postCreateCommand` (corre `init.sh`)
 (prepara `.venv` e instala/sincroniza dependencias con `uv`). **No corras `pip install` a mano.**
 Al final corre el **smoke test** (sintaxis + guard de conexión a SQL Server, sin conectarse); puedes
 repetirlo cuando quieras con `bash scripts/smoke-test.sh`.
@@ -133,7 +133,7 @@ repetirlo cuando quieras con `bash scripts/smoke-test.sh`.
 
 ### Gestión de dependencias con `uv`
 
-`uv` reemplaza a `pip` como herramienta de trabajo. Al crear el contenedor, el `postCreateCommand`
+`uv` reemplaza a `pip` como herramienta de trabajo. Al crear el contenedor, el `postCreateCommand` llama a **`init.sh`**, que
 detecta el estado del proyecto y actúa solo:
 
 | Estado del repo | Qué ejecuta |
@@ -214,6 +214,7 @@ El estándar (detallado en [`README_AGENTS.md`](./README_AGENTS.md) §11) es **s
 │   ├── db/             # connection.py (fábrica de engines SQLAlchemy)
 │   ├── pipelines/      # lógica del pipeline
 │   └── utils/          # utilidades de datos (limpieza, formato, índices)
+├── init.sh             # deja el entorno listo (uv + smoke-test); lo corre el postCreateCommand
 ├── .env.example        # plantilla de variables de entorno (copiar a .env)
 ├── requirements.txt    # dependencias (base para pyproject.toml + uv.lock)
 ├── README.md           # este archivo

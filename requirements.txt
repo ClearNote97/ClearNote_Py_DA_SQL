@@ -24,3 +24,6 @@ ipynbname
 # Utility libraries
 python-dateutil
 python-dotenv
+
+# Synthetic test data (descomentar cuando haga falta)
+# faker               # datos realistas pero falsos (nombres, documentos, direcciones; locale es_CO) para pruebas y demos — nunca datos reales

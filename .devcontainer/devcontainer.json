@@ -47,5 +47,5 @@
   "remoteUser": "root",
 
   // 🐍 Comando para instalar dependencias usando uv, que es un gestor de paquetes moderno y eficiente. Se verifica si existe pyproject.toml o requirements.txt para decidir cómo instalar las dependencias; al final corre scripts/smoke-test.sh (no bloquea).
-  "postCreateCommand": "sh -lc 'if [ -f pyproject.toml ]; then if [ -f uv.lock ]; then uv sync --locked; else uv lock && uv sync; fi; elif [ -f requirements.txt ]; then uv init --no-package --no-workspace . && rm -f main.py && uv add -r requirements.txt; else echo \"No se encontró ni pyproject.toml ni requirements.txt\" >&2; exit 1; fi; bash scripts/smoke-test.sh || echo \"⚠️  smoke-test con hallazgos (no bloquea)\"'"
+  "postCreateCommand": "bash init.sh"
 }
