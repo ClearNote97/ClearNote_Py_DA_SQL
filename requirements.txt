@@ -25,5 +25,9 @@ ipynbname
 python-dateutil
 python-dotenv
 
+# Tests and code quality
+pytest              # el gate de tests/ (README_AGENTS §6)
+ruff                # lint + formato desde la terminal (la extensión de VS Code usa su propio binario)
+
 # Synthetic test data (descomentar cuando haga falta)
 # faker               # datos realistas pero falsos (nombres, documentos, direcciones; locale es_CO) para pruebas y demos — nunca datos reales
